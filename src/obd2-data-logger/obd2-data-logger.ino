@@ -30,7 +30,7 @@ bool isActive; // State of logging activity
 void setup() {
   // Initialize Serial communication for debugging
   Serial.begin(9600);
-  Serial.println("ECU Demo");
+  Serial.println("*** ECU data logger initializing ***");
   
   // Initialize pins as necessary
   pinMode(chipSelect, OUTPUT);
@@ -47,11 +47,11 @@ void setup() {
   
   // Initialize CAN Controller 
   if (Canbus.init(CANSPEED_500)) {  // Initialize MCP2515 CAN controller at the specified speed
-    Serial.println("CAN Init Ok");
+    Serial.println("CAN init successful");
     delay(1500);
   } 
   else {
-    Serial.println("Can't init CAN");
+    Serial.println("CAN init failed");
     return;
   } 
 
@@ -61,7 +61,7 @@ void setup() {
     return;
   }
   else {
-    Serial.println("uSD card initialized.");
+    Serial.println("uSD card initialized");
     delay(1500);
   }
 
@@ -71,7 +71,12 @@ void setup() {
 
 //********************************Main Loop*********************************//
 void loop() {
-  Serial.println(isActive);
+  if (isActive) {
+    Serial.println("Logging is active. Click to stop logging.");
+  }
+  else {
+    Serial.println("Idle. Click to start logging.");
+  }
   
   if (isActive) {
     digitalWrite(LED_A, HIGH); // Turn on LED_A to indicate active CAN Bus traffic
@@ -104,8 +109,6 @@ void loop() {
     if (!dataFile){
       Serial.println("Error opening data.txt");
     }
-        
-    Serial.println("Logging. Click to stop logging.");
     
     dataFile.print("Engine RPM: ");
     dataFile.println(EngineRPM);
