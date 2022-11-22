@@ -78,17 +78,20 @@ void loop() {
     
     Canbus.ecu_req(ENGINE_RPM, buffer); // Request engine RPM
     EngineRPM = buffer;
-    Serial.println("Engine RPM: " + buffer);
+    Serial.print("Engine RPM: ");
+    Serial.println(buffer);
     delay(100);
     
     Canbus.ecu_req(VEHICLE_SPEED, buffer); // Request vehicle speed
     VehicleSpeed = buffer;
-    Serial.println("Vehicle speed: " + buffer);
+    Serial.print("Vehicle speed: ");
+    Serial.println(buffer);
     delay(100);
 
     Canbus.ecu_req(THROTTLE, buffer); // Request throttle position
     ThrottlePosition = buffer;
-    Serial.println("Throttle position: " + buffer);
+    Serial.print("Throttle position: ");
+    Serial.println(buffer);
     delay(100);
    
     digitalWrite(LED_A, LOW); // Turn off LED_A
@@ -104,9 +107,12 @@ void loop() {
         
     Serial.println("Logging. Click to stop logging.");
     
-    dataFile.println("Engine RPM: " + EngineRPM);
-    dataFile.println("Vehicle speed: " + VehicleSpeed);
-    dataFile.println("Throttle position: " + ThrottlePosition);
+    dataFile.print("Engine RPM: ");
+    dataFile.println(EngineRPM);
+    dataFile.print("Vehicle speed: ");
+    dataFile.println(VehicleSpeed);
+    dataFile.print("Throttle position: ");
+    dataFile.println(ThrottlePosition);
     
     dataFile.println();
     dataFile.flush();
