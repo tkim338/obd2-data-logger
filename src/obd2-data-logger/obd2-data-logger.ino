@@ -28,6 +28,9 @@ char engineRpmBuffer[64], vehicleSpeedBuffer[64], throttlePositionBuffer[64];
 
 bool isActive; // State of logging activity
 
+// Name of file to write data to
+char *filename;
+
 //********************************Setup Loop*********************************//
 void setup() {
   // Initialize Serial communication for debugging
@@ -67,6 +70,22 @@ void setup() {
     delay(1500);
   }
 
+  // Check if data file exists.  If not, write column headers.
+  if (!SD.exists(filename)) {
+    File dataFile = SD.open(filename, FILE_WRITE); // Open uSD file to log data
+    
+    // If data file can't be opened, throw error.
+    if (!dataFile){
+      Serial.println("Error opening file: ");
+      Serial.println(filename);
+      return;
+    }
+
+    dataFile.println("engine_rpm,vehicle_speed,throttle_position");
+    dataFile.flush();
+    dataFile.close(); // Close data logging file
+  }
+
   // Set initial state of logger
   isActive = false;
 }
@@ -86,37 +105,32 @@ void loop() {
     Canbus.ecu_req(ENGINE_RPM, engineRpmBuffer); // Request engine RPM
     Serial.print("Engine RPM: ");
     Serial.println(engineRpmBuffer);
-    delay(100);
     
     Canbus.ecu_req(VEHICLE_SPEED, vehicleSpeedBuffer); // Request vehicle speed
     Serial.print("Vehicle speed: ");
     Serial.println(vehicleSpeedBuffer);
-    delay(100);
 
     Canbus.ecu_req(THROTTLE, throttlePositionBuffer); // Request throttle position
     Serial.print("Throttle position: ");
     Serial.println(throttlePositionBuffer);
-    delay(100);
    
     digitalWrite(LED_A, LOW); // Turn off LED_A
     digitalWrite(LED_B, HIGH); // Turn on LED_B
     delay(500);
       
-    File dataFile = SD.open("data.txt", FILE_WRITE); // Open uSD file to log data
+    File dataFile = SD.open(filename, FILE_WRITE); // Open uSD file to log data
       
     // If data file can't be opened, throw error.
     if (!dataFile){
-      Serial.println("Error opening data.txt");
+      Serial.print("Error opening file: ");
+      Serial.print(filename);
     }
-    
-    dataFile.print("Engine RPM: ");
-    dataFile.println(EngineRPM);
-    dataFile.print("Vehicle speed: ");
-    dataFile.println(VehicleSpeed);
-    dataFile.print("Throttle position: ");
-    dataFile.println(ThrottlePosition);
-    
+
+    dataFile.print(EngineRPM);
+    dataFile.print(VehicleSpeed);
+    dataFile.print(ThrottlePosition);
     dataFile.println();
+
     dataFile.flush();
     dataFile.close(); // Close data logging file
 
