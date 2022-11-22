@@ -21,7 +21,7 @@ const int chipSelect = 9;
 File dataFile;
 
 // Declare CAN variables for communication
-char *EngineRPM;
+char *EngineRPM, *VehicleSpeed, *ThrottlePosition;
 char buffer[64];  // Data will be temporarily stored to this buffer before being written to the file
 
 bool isActive; // State of logging activity
@@ -46,24 +46,24 @@ void setup() {
   digitalWrite(LED_B, LOW);
   
   // Initialize CAN Controller 
-//  if (Canbus.init(CANSPEED_500)) {  // Initialize MCP2515 CAN controller at the specified speed
-//    Serial.println("CAN Init Ok");
-//    delay(1500);
-//  } 
-//  else {
-//    Serial.println("Can't init CAN");
-//    return;
-//  } 
+  if (Canbus.init(CANSPEED_500)) {  // Initialize MCP2515 CAN controller at the specified speed
+    Serial.println("CAN Init Ok");
+    delay(1500);
+  } 
+  else {
+    Serial.println("Can't init CAN");
+    return;
+  } 
 
   // Check if uSD card initialized
-//  if (!SD.begin(chipSelect)) {
-//    Serial.println("uSD card failed to initialize, or is not present");
-//    return;
-//  }
-//  else {
-//    Serial.println("uSD card initialized.");
-//    delay(1500);
-//  }
+  if (!SD.begin(chipSelect)) {
+    Serial.println("uSD card failed to initialize, or is not present");
+    return;
+  }
+  else {
+    Serial.println("uSD card initialized.");
+    delay(1500);
+  }
 
   // Set initial state of logger
   isActive = false;
@@ -74,33 +74,43 @@ void loop() {
   Serial.println(isActive);
   
   if (isActive) {
-    digitalWrite(LED_A, HIGH); // Turn on LED_A to indicate CAN Bus traffic
-//    Canbus.ecu_req(ENGINE_RPM,buffer); // Request engine RPM
-//    EngineRPM = buffer;
-    Serial.print("Engine RPM: ");
-//    Serial.println(buffer);
+    digitalWrite(LED_A, HIGH); // Turn on LED_A to indicate active CAN Bus traffic
+    
+    Canbus.ecu_req(ENGINE_RPM, buffer); // Request engine RPM
+    EngineRPM = buffer;
+    Serial.println("Engine RPM: " + buffer);
+    delay(100);
+    
+    Canbus.ecu_req(VEHICLE_SPEED, buffer); // Request vehicle speed
+    VehicleSpeed = buffer;
+    Serial.println("Vehicle speed: " + buffer);
+    delay(100);
+
+    Canbus.ecu_req(THROTTLE, buffer); // Request throttle position
+    ThrottlePosition = buffer;
+    Serial.println("Throttle position: " + buffer);
     delay(100);
    
     digitalWrite(LED_A, LOW); // Turn off LED_A
     digitalWrite(LED_B, HIGH); // Turn on LED_B
     delay(500);
       
-//    File dataFile = SD.open("data.txt", FILE_WRITE); // Open uSD file to log data
+    File dataFile = SD.open("data.txt", FILE_WRITE); // Open uSD file to log data
       
     // If data file can't be opened, throw error.
-//    if (!dataFile){
-//      Serial.print("Error opening");
-//      Serial.println("data.txt");
-//    }
+    if (!dataFile){
+      Serial.println("Error opening data.txt");
+    }
         
     Serial.println("Logging. Click to stop logging.");
     
-//    dataFile.print("Engine RPM: ");
-//    dataFile.println(EngineRPM);
-//    
-//    dataFile.println();
-//    dataFile.flush();
-//    dataFile.close(); // Close data logging file
+    dataFile.println("Engine RPM: " + EngineRPM);
+    dataFile.println("Vehicle speed: " + VehicleSpeed);
+    dataFile.println("Throttle position: " + ThrottlePosition);
+    
+    dataFile.println();
+    dataFile.flush();
+    dataFile.close(); // Close data logging file
 
     digitalWrite(LED_B, LOW); // Turn off LED_B
   }
