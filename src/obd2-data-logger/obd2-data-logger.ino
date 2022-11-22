@@ -48,9 +48,9 @@ void setup() {
   // Pull analog pins high to enable reading of joystick movements
   digitalWrite(CLICK, HIGH);
   
-  // Write LED pins low to turn them off by default
-  digitalWrite(LED_A, LOW);
-  digitalWrite(LED_B, LOW);
+  // Write LED pins low to turn them on
+  digitalWrite(LED_A, HIGH);
+  digitalWrite(LED_B, HIGH);
   
   // Initialize CAN Controller 
   if (Canbus.init(CANSPEED_500)) {  // Initialize MCP2515 CAN controller at the specified speed
@@ -78,6 +78,10 @@ void setup() {
 
   // Set initial state of logger
   isActive = false;
+
+  // Turn off LEDs
+  digitalWrite(LED_A, LOW);
+  digitalWrite(LED_B, LOW);
 }
 
 //********************************Main Loop*********************************//
