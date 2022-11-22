@@ -29,8 +29,8 @@ char engineRpmBuffer[64], vehicleSpeedBuffer[64], throttlePositionBuffer[64];
 bool isActive; // State of logging activity
 
 // Names of files to write config info and data to
-char configFilename[] = "data.csv";
-char dataFilename[] = "config.txt";
+char configFilename[] = "config.txt";
+char dataFilename[] = "data.csv";
 char columnHeaders[] = "engine_rpm,vehicle_speed,throttle_position";
 
 //********************************Setup Loop*********************************//
