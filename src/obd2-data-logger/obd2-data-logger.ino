@@ -71,6 +71,8 @@ void setup() {
 
 //********************************Main Loop*********************************//
 void loop() {
+  Serial.println(isActive);
+  
   if (isActive) {
     digitalWrite(LED_A, HIGH); // Turn on LED_A to indicate CAN Bus traffic
 //    Canbus.ecu_req(ENGINE_RPM,buffer); // Request engine RPM
@@ -93,7 +95,7 @@ void loop() {
         
     Serial.println("Logging. Click to stop logging.");
     
-//    dataFile.print("Engine RPM: "); 
+//    dataFile.print("Engine RPM: ");
 //    dataFile.println(EngineRPM);
 //    
 //    dataFile.println();
@@ -101,12 +103,11 @@ void loop() {
 //    dataFile.close(); // Close data logging file
 
     digitalWrite(LED_B, LOW); // Turn off LED_B
-    delay(1000);
   }
   
   // Check for joystick click and update state.
   if (digitalRead(CLICK)==LOW) {
-    isActive = ~isActive;
+    isActive = !isActive;
     while (digitalRead(CLICK)==LOW) {} // Hold code in this state until button is released
   }
 }
