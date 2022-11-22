@@ -28,8 +28,10 @@ char engineRpmBuffer[64], vehicleSpeedBuffer[64], throttlePositionBuffer[64];
 
 bool isActive; // State of logging activity
 
-// Name of file to write data to
-char *filename;
+// Names of files to write config info and data to
+char configFilename[] = "data.csv";
+char dataFilename[] = "config.txt";
+char columnHeaders[] = "engine_rpm,vehicle_speed,throttle_position";
 
 //********************************Setup Loop*********************************//
 void setup() {
@@ -71,20 +73,8 @@ void setup() {
   }
 
   // Check if data file exists.  If not, write column headers.
-  if (!SD.exists(filename)) {
-    File dataFile = SD.open(filename, FILE_WRITE); // Open uSD file to log data
-    
-    // If data file can't be opened, throw error.
-    if (!dataFile){
-      Serial.println("Error opening file: ");
-      Serial.println(filename);
-      return;
-    }
-
-    dataFile.println("engine_rpm,vehicle_speed,throttle_position");
-    dataFile.flush();
-    dataFile.close(); // Close data logging file
-  }
+  setupDataFile(dataFilename, columnHeaders);
+  generateConfigFile(configFilename);
 
   // Set initial state of logger
   isActive = false;
@@ -118,16 +108,12 @@ void loop() {
     digitalWrite(LED_B, HIGH); // Turn on LED_B
     delay(500);
       
-    File dataFile = SD.open(filename, FILE_WRITE); // Open uSD file to log data
-      
-    // If data file can't be opened, throw error.
-    if (!dataFile){
-      Serial.print("Error opening file: ");
-      Serial.print(filename);
-    }
+    File dataFile = openFile(dataFilename);
 
     dataFile.print(EngineRPM);
+    dataFile.print(",");
     dataFile.print(VehicleSpeed);
+    dataFile.print(",");
     dataFile.print(ThrottlePosition);
     dataFile.println();
 
@@ -142,4 +128,43 @@ void loop() {
     isActive = !isActive;
     while (digitalRead(CLICK)==LOW) {} // Hold code in this state until button is released
   }
+}
+
+// Check if data file exists.  If not, write column headers to data file.
+void setupDataFile(char filename[], char columnHeaders[]) {
+  if (!SD.exists(filename)) {
+    File dataFile = openFile(filename);
+
+    dataFile.println(columnHeaders);
+    
+    dataFile.flush();
+    dataFile.close(); // Close data logging file
+  }
+}
+
+// Create config file with available PIDs.
+void generateConfigFile(char filename[]) {
+  char *AvailablePidBuffer;
+  Canbus.ecu_req(0x01, AvailablePidBuffer); // Request all available PIDs
+  Serial.print("Available PIDs: ");
+  Serial.println(AvailablePidBuffer);
+
+  File configFile = openFile(filename);
+  configFile.print("Available PIDs: ");
+  configFile.println(AvailablePidBuffer);
+  
+  configFile.flush();
+  configFile.close();
+}
+
+File openFile(char filename[]) {
+  File file = SD.open(filename, FILE_WRITE); // Open uSD file to log data
+  
+  // If data file can't be opened, throw error.
+  if (!file){
+    Serial.println("Error opening file: ");
+    Serial.println(filename);
+  }
+
+  return file;
 }
