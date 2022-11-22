@@ -22,7 +22,9 @@ File dataFile;
 
 // Declare CAN variables for communication
 char *EngineRPM, *VehicleSpeed, *ThrottlePosition;
-char buffer[64];  // Data will be temporarily stored to this buffer before being written to the file
+
+// Data will be temporarily stored to this buffer before being written to the file
+char engineRpmBuffer[64], vehicleSpeedBuffer[64], throttlePositionBuffer[64];
 
 bool isActive; // State of logging activity
 
@@ -81,22 +83,19 @@ void loop() {
   if (isActive) {
     digitalWrite(LED_A, HIGH); // Turn on LED_A to indicate active CAN Bus traffic
     
-    Canbus.ecu_req(ENGINE_RPM, buffer); // Request engine RPM
-    EngineRPM = buffer;
+    Canbus.ecu_req(ENGINE_RPM, engineRpmBuffer); // Request engine RPM
     Serial.print("Engine RPM: ");
-    Serial.println(buffer);
+    Serial.println(engineRpmBuffer);
     delay(100);
     
-    Canbus.ecu_req(VEHICLE_SPEED, buffer); // Request vehicle speed
-    VehicleSpeed = buffer;
+    Canbus.ecu_req(VEHICLE_SPEED, vehicleSpeedBuffer); // Request vehicle speed
     Serial.print("Vehicle speed: ");
-    Serial.println(buffer);
+    Serial.println(vehicleSpeedBuffer);
     delay(100);
 
-    Canbus.ecu_req(THROTTLE, buffer); // Request throttle position
-    ThrottlePosition = buffer;
+    Canbus.ecu_req(THROTTLE, throttlePositionBuffer); // Request throttle position
     Serial.print("Throttle position: ");
-    Serial.println(buffer);
+    Serial.println(throttlePositionBuffer);
     delay(100);
    
     digitalWrite(LED_A, LOW); // Turn off LED_A
