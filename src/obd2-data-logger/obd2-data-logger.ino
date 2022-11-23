@@ -97,20 +97,26 @@ void loop() {
     digitalWrite(LED_A, HIGH); // Turn on LED_A to indicate active CAN Bus traffic
     
     Canbus.ecu_req(ENGINE_RPM, engineRpmBuffer); // Request engine RPM
+    EngineRPM = engineRpmBuffer;
     Serial.print("Engine RPM: ");
-    Serial.println(engineRpmBuffer);
+    Serial.println(EngineRPM);
+    delay(10);
     
     Canbus.ecu_req(VEHICLE_SPEED, vehicleSpeedBuffer); // Request vehicle speed
+    VehicleSpeed = vehicleSpeedBuffer;
     Serial.print("Vehicle speed: ");
-    Serial.println(vehicleSpeedBuffer);
+    Serial.println(VehicleSpeed);
+    delay(10);
 
     Canbus.ecu_req(THROTTLE, throttlePositionBuffer); // Request throttle position
+    ThrottlePosition = throttlePositionBuffer;
     Serial.print("Throttle position: ");
-    Serial.println(throttlePositionBuffer);
+    Serial.println(ThrottlePosition);
+    delay(10);
    
     digitalWrite(LED_A, LOW); // Turn off LED_A
     digitalWrite(LED_B, HIGH); // Turn on LED_B
-    delay(500);
+    delay(50);
       
     File dataFile = openFile(dataFilename);
 
