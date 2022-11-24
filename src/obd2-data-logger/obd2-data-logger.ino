@@ -155,7 +155,7 @@ void setupDataFile(char filename[], char columnHeaders[]) {
 // Create config file with available PIDs.
 void generateConfigFile(char filename[]) {
   char *AvailablePidBuffer;
-  Canbus.ecu_req(0x01, AvailablePidBuffer); // Request all available PIDs
+  Canbus.ecu_req(0x00, AvailablePidBuffer); // Request all available PIDs
   Serial.print("Available PIDs: ");
   Serial.println(AvailablePidBuffer);
 
