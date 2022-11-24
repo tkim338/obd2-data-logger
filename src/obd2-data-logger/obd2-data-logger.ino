@@ -1,7 +1,6 @@
-//#include <SPI.h>
+#include <SPI.h> // dependency of SD.h
 #include <SD.h>
-//#include <SoftwareSerial.h>
-#include <CAN.h>
+#include <CAN.h> // dependency of OBD2.h
 #include <OBD2.h>
 
 // Chip Select pin is tied to pin 9 on the SparkFun CAN-Bus Shield
@@ -50,7 +49,7 @@ void setup() {
   // Pull analog pins high to enable reading of joystick movements
   digitalWrite(CLICK, HIGH);
 
-  // Write LED pins low to turn them on
+  // Write LED pins high to turn them on
   digitalWrite(LED_A, HIGH);
   digitalWrite(LED_B, HIGH);
 
