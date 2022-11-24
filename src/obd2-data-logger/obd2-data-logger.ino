@@ -18,24 +18,22 @@ const int chipSelect = 9;
 #define LED_A 7
 #define LED_B 8
 
-// Declare SD File
-File dataFile;
-
 bool isActive; // State of logging activity
 
-// Names of files to write config info and data to
-String configFilename = "config.txt";
-String dataFilename = "data.csv";
-String columnHeaders = "";
+int numCols = 6;
 int pidsOfInterest[] = {
   ::CALCULATED_ENGINE_LOAD,
-  ::ENGINE_COOLANT_TEMPERATURE,
   ::INTAKE_MANIFOLD_ABSOLUTE_PRESSURE,
   ::ENGINE_RPM,
   ::VEHICLE_SPEED,
   ::TIMING_ADVANCE,
   ::THROTTLE_POSITION
 };
+float dataRow[6];
+
+// Names of files to write config info and data to
+char configFilename[] = "config.txt";
+char dataFilename[] = "data.csv";
 
 //********************************Setup Loop*********************************//
 void setup() {
@@ -76,9 +74,32 @@ void setup() {
     delay(100);
   }
 
-  // Check if data file exists.  If not, write column headers.
-  generateConfigFile(configFilename);
-  setupDataFile(dataFilename, columnHeaders);
+  // Record all supported PIDs (up to 96) to config file
+  File configFile = SD.open(configFilename, FILE_WRITE);
+  for (int pid = 0; pid < 96; pid++) {
+    if (OBD2.pidSupported(pid)) {
+      configFile.print(pid);
+      configFile.print(',');
+      configFile.print(OBD2.pidName(pid));
+      configFile.print(',');
+      configFile.print(OBD2.pidUnits(pid));
+      configFile.println();
+    }
+  }
+  configFile.flush();
+  configFile.close();
+
+  // Initialize data file.  If file doesn't already exist, write column headers to first line.
+  if (!SD.exists(dataFilename)) {
+    File dataFile = SD.open(dataFilename, FILE_WRITE);
+    for (int i = 0; i < numCols; i++) {
+      dataFile.print(OBD2.pidName(pidsOfInterest[i]));
+      dataFile.print(",");
+    }
+    dataFile.println();
+    dataFile.flush();
+    dataFile.close();
+  }
 
   // Set initial state of logger
   isActive = false;
@@ -98,9 +119,24 @@ void loop() {
   }
 
   if (isActive) {
-    String data = readEcuParams(pidsOfInterest);
-    String dataList[] = {data};
-    writeToFile(dataFilename, dataList, 1);
+    // Read row of data from OBD2
+    digitalWrite(LED_A, HIGH);
+    for (int i = 0; i < numCols; i++) {
+      dataRow[i] = OBD2.pidRead(pidsOfInterest[i]);
+    }
+    digitalWrite(LED_A, LOW);
+  
+    // Write row of data to file
+    digitalWrite(LED_B, HIGH); // Turn on LED_B
+    File dataFile = SD.open(dataFilename, FILE_WRITE);
+    for (int i = 0; i < numCols; i++) {
+      dataFile.print(dataRow[i]);
+      dataFile.print(',');
+    }
+    dataFile.println();
+    dataFile.flush();
+    dataFile.close();
+    digitalWrite(LED_B, LOW); // Turn off LED_B
   }
 
   // Check for joystick click and update state.
@@ -108,62 +144,4 @@ void loop() {
     isActive = !isActive;
     while (digitalRead(CLICK) == LOW) {} // Hold code in this state until button is released
   }
-}
-
-// Check if data file exists.  If not, write column headers to data file.
-void setupDataFile(String filename, String columnHeaders) {
-  if (!SD.exists(filename)) {
-    File dataFile = openFile(filename);
-
-    dataFile.println(columnHeaders);
-
-    dataFile.flush();
-    dataFile.close(); // Close data logging file
-  }
-}
-
-// Create config file with available PIDs.
-String generateConfigFile(String filename) {
-  String pids = "";
-  String pidNames = "";
-  for (int pid = 0; pid < 96; pid++) {
-    if (OBD2.pidSupported(pid)) {
-      pids = pids + (String) pid + ",";
-      pidNames = pidNames + OBD2.pidName(pid) + " [" + OBD2.pidUnits(pid) + "],";
-    }
-  }
-  String dataList[] = {pids, pidNames, ""};
-  writeToFile(filename, dataList, 3);
-}
-
-String readEcuParams(int pids[]) {
-  digitalWrite(LED_A, HIGH);
-  digitalWrite(LED_A, LOW);
-  return "";
-}
-
-File openFile(String filename) {
-  File file = SD.open(filename, FILE_WRITE); // Open uSD file to log data
-
-  // If data file can't be opened, throw error.
-  if (!file) {
-    Serial.println("Error opening file: ");
-    Serial.println(filename);
-  }
-
-  return file;
-}
-
-void writeToFile(String filename, String lines[], int numLines) {
-  digitalWrite(LED_B, HIGH); // Turn on LED_B
-
-  File file = openFile(filename);
-  for (int i = 0; i < numLines; i++) {
-    file.print(lines[i]);
-    file.println();
-  }
-  file.flush();
-  file.close();
-
-  digitalWrite(LED_B, LOW); // Turn off LED_B
 }
