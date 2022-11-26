@@ -4,7 +4,7 @@
 #include <OBD2.h>
 
 // Chip Select pin is tied to pin 9 on the SparkFun CAN-Bus Shield
-const int chipSelect = 9;
+#define chipSelect 9
 
 // Define Joystick connection pins
 //#define UP     A1
