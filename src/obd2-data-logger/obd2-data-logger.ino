@@ -19,16 +19,35 @@
 
 bool isActive; // State of logging activity
 
-int numCols = 6;
 int pidsOfInterest[] = {
   ::CALCULATED_ENGINE_LOAD,
+  ::ENGINE_COOLANT_TEMPERATURE,
+  ::SHORT_TERM_FUEL_TRIM_BANK_1,
+  ::LONG_TERM_FUEL_TRIM_BANK_1,
   ::INTAKE_MANIFOLD_ABSOLUTE_PRESSURE,
   ::ENGINE_RPM,
   ::VEHICLE_SPEED,
   ::TIMING_ADVANCE,
-  ::THROTTLE_POSITION
+  ::AIR_INTAKE_TEMPERATURE,
+  ::THROTTLE_POSITION,
+  ::OXYGEN_SENSOR_2_SHORT_TERM_FUEL_TRIM,
+  ::FUEL_RAIL_GAUGE_PRESSURE,
+  ::FUEL_TANK_LEVEL_INPUT,
+  ::ABSOLULTE_BAROMETRIC_PRESSURE,
+  ::OXYGEN_SENSOR_1_FUEL_AIR_EQUIVALENCE_RATIO,
+//  ::CATALYST_TEMPERATURE_BANK_1_SENSOR_1,
+//  0x44, // Fuel–Air commanded equivalence ratio
+//  0x45, // Relative throttle position
+//  0x46, // Ambient air temperature
+//  0x47, // Absolute throttle position B
+//  0x49, // Absolute throttle position D
+//  0x4a, // Absolute throttle position E
+//  0x4c, // Commanded throttle actuator
 };
-float dataRow[6];
+int numCols = 15;
+//int numCols = sizeof(pidsOfInterest);
+float dataRow[15];
+//float dataRow[sizeof(pidsOfInterest)];
 
 // Names of files to write config info and data to
 char configFilename[] = "config.txt";
@@ -77,13 +96,6 @@ void setup() {
   File configFile = SD.open(configFilename, FILE_WRITE);
   for (int pid = 0; pid < 96; pid++) {
     if (OBD2.pidSupported(pid)) {
-//      configFile.print(pid);
-//      configFile.print(',');
-//      configFile.print(OBD2.pidName(pid));
-//      configFile.print(',');
-//      configFile.print(OBD2.pidUnits(pid));
-//      configFile.println();
-
       configFile.println(pid + "," + OBD2.pidName(pid) + "," + OBD2.pidUnits(pid));
     }
   }
