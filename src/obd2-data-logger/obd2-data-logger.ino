@@ -1,7 +1,7 @@
 #include <SPI.h> // dependency of SD.h
 #include <SD.h>
 #include <CAN.h> // dependency of OBD2.h
-#include "OBD2.h"
+#include <OBD2.h>
 
 // Chip Select pin is tied to pin 9 on the SparkFun CAN-Bus Shield
 #define chipSelect 9
