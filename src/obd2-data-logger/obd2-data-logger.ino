@@ -77,12 +77,14 @@ void setup() {
   File configFile = SD.open(configFilename, FILE_WRITE);
   for (int pid = 0; pid < 96; pid++) {
     if (OBD2.pidSupported(pid)) {
-      configFile.print(pid);
-      configFile.print(',');
-      configFile.print(OBD2.pidName(pid));
-      configFile.print(',');
-      configFile.print(OBD2.pidUnits(pid));
-      configFile.println();
+//      configFile.print(pid);
+//      configFile.print(',');
+//      configFile.print(OBD2.pidName(pid));
+//      configFile.print(',');
+//      configFile.print(OBD2.pidUnits(pid));
+//      configFile.println();
+
+      configFile.println(pid + "," + OBD2.pidName(pid) + "," + OBD2.pidUnits(pid));
     }
   }
   configFile.flush();
@@ -92,10 +94,8 @@ void setup() {
   if (!SD.exists(dataFilename)) {
     File dataFile = SD.open(dataFilename, FILE_WRITE);
     for (int i = 0; i < numCols; i++) {
-      dataFile.print(OBD2.pidName(pidsOfInterest[i]));
-      dataFile.print(",");
+      dataFile.println(OBD2.pidName(pidsOfInterest[i]) + "[" + OBD2.pidUnits(pidsOfInterest[i]) + "],");
     }
-    dataFile.println();
     dataFile.flush();
     dataFile.close();
   }
