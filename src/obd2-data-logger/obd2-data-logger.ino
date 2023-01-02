@@ -38,7 +38,7 @@ char dataFilename[] = "data.csv";
 void setup() {
   // Initialize Serial communication for debugging
   Serial.begin(9600);
-//  Serial.println("*** ECU data logger initializing ***");
+  Serial.println(F("*** ECU data logger initializing ***"));
 
   // Initialize pins as necessary
   pinMode(chipSelect, OUTPUT);
@@ -54,27 +54,24 @@ void setup() {
   digitalWrite(LED_B, HIGH);
 
   // Initialize CAN Controller
-  OBD2.begin();
-  delay(100);
-//  if (OBD2.begin()) {
-//    Serial.println("CAN init successful");
-//    delay(100);
-//  }
-//  else {
-//    Serial.println("CAN init failed");
-//    return;
-//  }
+  if (OBD2.begin()) {
+    Serial.println(F("CAN init successful"));
+    delay(100);
+  }
+  else {
+    Serial.println(F("CAN init failed"));
+    return;
+  }
 
   // Check if uSD card initialized
-  SD.begin(chipSelect);
-//  if (!SD.begin(chipSelect)) {
-//    Serial.println("uSD card failed to initialize, or is not present");
-//    return;
-//  }
-//  else {
-//    Serial.println("uSD card initialized");
-//    delay(100);
-//  }
+  if (!SD.begin(chipSelect)) {
+    Serial.println(F("uSD card failed to initialize, or is not present"));
+    return;
+  }
+  else {
+    Serial.println(F("uSD card initialized"));
+    delay(100);
+  }
 
   // Record all supported PIDs (up to 96) to config file
   File configFile = SD.open(configFilename, FILE_WRITE);
@@ -113,12 +110,12 @@ void setup() {
 
 //********************************Main Loop*********************************//
 void loop() {
-//  if (isActive) {
-//    Serial.println("Logging is active. Click to stop logging.");
-//  }
-//  else {
-//    Serial.println("Idle. Click to start logging.");
-//  }
+  if (isActive) {
+    Serial.println(F("Logging is active. Click to stop logging."));
+  }
+  else {
+    Serial.println(F("Idle. Click to start logging."));
+  }
 
   if (isActive) {
     // Read row of data from OBD2
