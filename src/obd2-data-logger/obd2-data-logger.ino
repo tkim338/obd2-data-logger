@@ -20,6 +20,7 @@
 bool isActive; // State of logging activity
 
 int pidsOfInterest[] = {
+  ::RUN_TIME_SINCE_ENGINE_START,
   ::CALCULATED_ENGINE_LOAD,
   ::ENGINE_COOLANT_TEMPERATURE,
   ::SHORT_TERM_FUEL_TRIM_BANK_1,
@@ -37,14 +38,14 @@ int pidsOfInterest[] = {
 //  ::OXYGEN_SENSOR_1_FUEL_AIR_EQUIVALENCE_RATIO,
 //  ::CATALYST_TEMPERATURE_BANK_1_SENSOR_1,
 };
-int numCols = 13;
+int numCols = 14;
 //const int numCols = sizeof(pidsOfInterest);
-float dataRow[13];
+float dataRow[14];
 //float dataRow[sizeof(pidsOfInterest)];
 
 // Names of files to write config info and data to
 char configFilename[] = "config.txt";
-char dataFilename[] = "data.csv";
+char dataFilename[] = "data_000.csv";
 
 //********************************Setup Loop*********************************//
 void setup() {
@@ -95,15 +96,18 @@ void setup() {
   configFile.flush();
   configFile.close();
 
-  // Initialize data file.  If file doesn't already exist, write column headers to first line.
-  if (!SD.exists(dataFilename)) {
-    File dataFile = SD.open(dataFilename, FILE_WRITE);
-    for (int i = 0; i < numCols; i++) {
-      dataFile.println(OBD2.pidName(pidsOfInterest[i]) + "[" + OBD2.pidUnits(pidsOfInterest[i]) + "],");
-    }
-    dataFile.flush();
-    dataFile.close();
+  // Initialize data file: find next num of data file, create file, and write column headers to first line.
+  int n = 0;
+  while (SD.exists(dataFilename)) {
+    n += 1;
+    sprintf(dataFilename, "data_%03d.csv", n);
   }
+  File dataFile = SD.open(dataFilename, FILE_WRITE);
+  for (int i = 0; i < numCols; i++) {
+    dataFile.println(OBD2.pidName(pidsOfInterest[i]) + "[" + OBD2.pidUnits(pidsOfInterest[i]) + "],");
+  }
+  dataFile.flush();
+  dataFile.close();
 
   // Set initial state of logger
   isActive = false;
