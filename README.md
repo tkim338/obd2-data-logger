@@ -7,7 +7,7 @@ Log ECU data using an Arduino, CAN bus shield, and ODB2 port
 3) ODB2-DB9 cable*
 4) micro-SD card
 
-*cable pinout*:
+*cable pinout:
 | pin description | OBD-II | DB9 |
 |--|--|--|
 J1850 BUS+ | 2 | 7
