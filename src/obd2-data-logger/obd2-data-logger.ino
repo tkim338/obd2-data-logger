@@ -35,8 +35,7 @@ int pidsOfInterest[] = {
   ::FUEL_RAIL_GAUGE_PRESSURE,
   ::FUEL_TANK_LEVEL_INPUT,
   ::ABSOLULTE_BAROMETRIC_PRESSURE,
-  ::OXYGEN_SENSOR_1_FUEL_AIR_EQUIVALENCE_RATIO,
-//  ::CATALYST_TEMPERATURE_BANK_1_SENSOR_1,
+  ::CATALYST_TEMPERATURE_BANK_1_SENSOR_1,
 };
 int numCols = 16;
 //const int numCols = sizeof(pidsOfInterest);
@@ -88,9 +87,11 @@ void setup() {
 
   // Record all supported PIDs (up to 96) to config file
   File configFile = SD.open(configFilename, FILE_WRITE);
+  char configFileRow [100];
   for (int pid = 0; pid < 96; pid++) {
     if (OBD2.pidSupported(pid)) {
-      configFile.println(pid + "," + OBD2.pidName(pid) + "," + OBD2.pidUnits(pid));
+      sprintf(configFileRow, "%i,%s,%s", pid, OBD2.pidName(pid), OBD2.pidUnits(pid));
+      configFile.println(configFileRow);
     }
   }
   configFile.flush();
@@ -100,12 +101,13 @@ void setup() {
   int n = 0;
   while (SD.exists(dataFilename)) {
     n += 1;
-    sprintf(dataFilename, "data_%03d.csv", n);
+    sprintf(dataFilename, "data_%03i.csv", n);
   }
   File dataFile = SD.open(dataFilename, FILE_WRITE);
   for (int i = 0; i < numCols; i++) {
-    dataFile.println(OBD2.pidName(pidsOfInterest[i]) + "[" + OBD2.pidUnits(pidsOfInterest[i]) + "],");
+    dataFile.print(OBD2.pidName(pidsOfInterest[i]) + "[" + OBD2.pidUnits(pidsOfInterest[i]) + "],");
   }
+  dataFile.println();
   dataFile.flush();
   dataFile.close();
 
@@ -133,7 +135,7 @@ void loop() {
       dataRow[i] = OBD2.pidRead(pidsOfInterest[i]);
     }
     digitalWrite(LED_A, LOW);
-  
+
     // Write row of data to file
     digitalWrite(LED_B, HIGH); // Turn on LED_B
     File dataFile = SD.open(dataFilename, FILE_WRITE);
