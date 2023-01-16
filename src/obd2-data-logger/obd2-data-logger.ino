@@ -31,17 +31,14 @@ int pidsOfInterest[] = {
   ::TIMING_ADVANCE,
   ::AIR_INTAKE_TEMPERATURE,
   ::THROTTLE_POSITION,
-//  ::OXYGEN_SENSOR_2_SHORT_TERM_FUEL_TRIM,
+  ::OXYGEN_SENSOR_2_SHORT_TERM_FUEL_TRIM,
   ::FUEL_RAIL_GAUGE_PRESSURE,
   ::FUEL_TANK_LEVEL_INPUT,
   ::ABSOLULTE_BAROMETRIC_PRESSURE,
-//  ::OXYGEN_SENSOR_1_FUEL_AIR_EQUIVALENCE_RATIO,
-//  ::CATALYST_TEMPERATURE_BANK_1_SENSOR_1,
+  ::CATALYST_TEMPERATURE_BANK_1_SENSOR_1,
 };
-int numCols = 14;
-//const int numCols = sizeof(pidsOfInterest);
-float dataRow[14];
-//float dataRow[sizeof(pidsOfInterest)];
+const int numCols = sizeof(pidsOfInterest)  / sizeof(int);
+float dataRow[numCols];
 
 // Names of files to write config info and data to
 char configFilename[] = "config.txt";
@@ -90,7 +87,11 @@ void setup() {
   File configFile = SD.open(configFilename, FILE_WRITE);
   for (int pid = 0; pid < 96; pid++) {
     if (OBD2.pidSupported(pid)) {
-      configFile.println(pid + "," + OBD2.pidName(pid) + "," + OBD2.pidUnits(pid));
+      configFile.print(pid);
+      configFile.print(F(","));
+      configFile.print(OBD2.pidName(pid));
+      configFile.print(F(","));
+      configFile.println(OBD2.pidUnits(pid));
     }
   }
   configFile.flush();
@@ -100,17 +101,21 @@ void setup() {
   int n = 0;
   while (SD.exists(dataFilename)) {
     n += 1;
-    sprintf(dataFilename, "data_%03d.csv", n);
+    sprintf(dataFilename, "data_%03i.csv", n);
   }
   File dataFile = SD.open(dataFilename, FILE_WRITE);
   for (int i = 0; i < numCols; i++) {
-    dataFile.println(OBD2.pidName(pidsOfInterest[i]) + "[" + OBD2.pidUnits(pidsOfInterest[i]) + "],");
+    dataFile.print(OBD2.pidName(pidsOfInterest[i]));
+    dataFile.print(F(" ["));
+    dataFile.print(OBD2.pidUnits(pidsOfInterest[i]));
+    dataFile.print(F("],"));
   }
+  dataFile.println();
   dataFile.flush();
   dataFile.close();
 
   // Set initial state of logger
-  isActive = false;
+  isActive = true;
 
   // Turn off LEDs
   digitalWrite(LED_A, LOW);
@@ -119,13 +124,6 @@ void setup() {
 
 //********************************Main Loop*********************************//
 void loop() {
-  if (isActive) {
-    Serial.println(F("Logging is active. Click to stop logging."));
-  }
-  else {
-    Serial.println(F("Idle. Click to start logging."));
-  }
-
   if (isActive) {
     // Read row of data from OBD2
     digitalWrite(LED_A, HIGH);
@@ -146,7 +144,7 @@ void loop() {
     dataFile.close();
     digitalWrite(LED_B, LOW); // Turn off LED_B
   }
-
+  
   // Check for joystick click and update state.
   if (digitalRead(CLICK) == LOW) {
     isActive = !isActive;
