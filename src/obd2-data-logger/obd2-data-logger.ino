@@ -104,8 +104,10 @@ void setup() {
     sprintf(dataFilename, "data_%03i.csv", n);
   }
   File dataFile = SD.open(dataFilename, FILE_WRITE);
+  char dataFileEntry [20];
   for (int i = 0; i < numCols; i++) {
-    dataFile.print(OBD2.pidName(pidsOfInterest[i]) + "[" + OBD2.pidUnits(pidsOfInterest[i]) + "],");
+    sprintf(dataFileEntry, "%s [%s]", OBD2.pidName(pidsOfInterest[i]), OBD2.pidUnits(pidsOfInterest[i]));
+    dataFile.print(dataFileEntry);
   }
   dataFile.println();
   dataFile.flush();
