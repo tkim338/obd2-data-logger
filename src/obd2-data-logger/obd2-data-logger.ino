@@ -31,16 +31,16 @@ int pidsOfInterest[] = {
   ::TIMING_ADVANCE,
   ::AIR_INTAKE_TEMPERATURE,
   ::THROTTLE_POSITION,
-//  ::OXYGEN_SENSOR_2_SHORT_TERM_FUEL_TRIM,
+  ::OXYGEN_SENSOR_2_SHORT_TERM_FUEL_TRIM,
   ::FUEL_RAIL_GAUGE_PRESSURE,
   ::FUEL_TANK_LEVEL_INPUT,
   ::ABSOLULTE_BAROMETRIC_PRESSURE,
-//  ::OXYGEN_SENSOR_1_FUEL_AIR_EQUIVALENCE_RATIO,
+  ::OXYGEN_SENSOR_1_FUEL_AIR_EQUIVALENCE_RATIO,
 //  ::CATALYST_TEMPERATURE_BANK_1_SENSOR_1,
 };
-int numCols = 14;
+int numCols = 16;
 //const int numCols = sizeof(pidsOfInterest);
-float dataRow[14];
+float dataRow[16];
 //float dataRow[sizeof(pidsOfInterest)];
 
 // Names of files to write config info and data to
