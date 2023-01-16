@@ -37,10 +37,8 @@ int pidsOfInterest[] = {
   ::ABSOLULTE_BAROMETRIC_PRESSURE,
   ::CATALYST_TEMPERATURE_BANK_1_SENSOR_1,
 };
-int numCols = 16;
-//const int numCols = sizeof(pidsOfInterest);
-float dataRow[16];
-//float dataRow[sizeof(pidsOfInterest)];
+const int numCols = sizeof(pidsOfInterest)  / sizeof(int);
+float dataRow[numCols];
 
 // Names of files to write config info and data to
 char configFilename[] = "config.txt";
