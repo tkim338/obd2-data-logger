@@ -11,7 +11,7 @@
 //#define DOWN   A3
 //#define LEFT   A2
 //#define RIGHT  A5
-#define CLICK  A4
+//#define CLICK  A4
 
 // Define LED pins
 #define LED_A 7
@@ -54,12 +54,8 @@ void setup() {
 
   // Initialize pins as necessary
   pinMode(chipSelect, OUTPUT);
-  pinMode(CLICK, INPUT);
   pinMode(LED_A, OUTPUT);
   pinMode(LED_B, OUTPUT);
-
-  // Pull analog pins high to enable reading of joystick movements
-  digitalWrite(CLICK, HIGH);
 
   // Write LED pins high to turn them on
   digitalWrite(LED_A, HIGH);
@@ -87,11 +83,13 @@ void setup() {
 
   // Record all supported PIDs (up to 96) to config file
   File configFile = SD.open(configFilename, FILE_WRITE);
-  char configFileRow [100];
   for (int pid = 0; pid < 96; pid++) {
     if (OBD2.pidSupported(pid)) {
-      sprintf(configFileRow, "%i,%s,%s", pid, OBD2.pidName(pid), OBD2.pidUnits(pid));
-      configFile.println(configFileRow);
+      configFile.print(pid);
+      configFile.print(F(","));
+      configFile.print(OBD2.pidName(pid));
+      configFile.print(F(","));
+      configFile.println(OBD2.pidUnits(pid));
     }
   }
   configFile.flush();
@@ -104,17 +102,15 @@ void setup() {
     sprintf(dataFilename, "data_%03i.csv", n);
   }
   File dataFile = SD.open(dataFilename, FILE_WRITE);
-  char dataFileEntry [20];
   for (int i = 0; i < numCols; i++) {
-    sprintf(dataFileEntry, "%s [%s]", OBD2.pidName(pidsOfInterest[i]), OBD2.pidUnits(pidsOfInterest[i]));
-    dataFile.print(dataFileEntry);
+    dataFile.print(OBD2.pidName(pidsOfInterest[i]));
+    dataFile.print(F(" ["));
+    dataFile.print(OBD2.pidUnits(pidsOfInterest[i]));
+    dataFile.print(F("],"));
   }
   dataFile.println();
   dataFile.flush();
   dataFile.close();
-
-  // Set initial state of logger
-  isActive = false;
 
   // Turn off LEDs
   digitalWrite(LED_A, LOW);
@@ -123,37 +119,22 @@ void setup() {
 
 //********************************Main Loop*********************************//
 void loop() {
-  if (isActive) {
-    Serial.println(F("Logging is active. Click to stop logging."));
+  // Read row of data from OBD2
+  digitalWrite(LED_A, HIGH);
+  for (int i = 0; i < numCols; i++) {
+    dataRow[i] = OBD2.pidRead(pidsOfInterest[i]);
   }
-  else {
-    Serial.println(F("Idle. Click to start logging."));
-  }
+  digitalWrite(LED_A, LOW);
 
-  if (isActive) {
-    // Read row of data from OBD2
-    digitalWrite(LED_A, HIGH);
-    for (int i = 0; i < numCols; i++) {
-      dataRow[i] = OBD2.pidRead(pidsOfInterest[i]);
-    }
-    digitalWrite(LED_A, LOW);
-
-    // Write row of data to file
-    digitalWrite(LED_B, HIGH); // Turn on LED_B
-    File dataFile = SD.open(dataFilename, FILE_WRITE);
-    for (int i = 0; i < numCols; i++) {
-      dataFile.print(dataRow[i]);
-      dataFile.print(',');
-    }
-    dataFile.println();
-    dataFile.flush();
-    dataFile.close();
-    digitalWrite(LED_B, LOW); // Turn off LED_B
+  // Write row of data to file
+  digitalWrite(LED_B, HIGH); // Turn on LED_B
+  File dataFile = SD.open(dataFilename, FILE_WRITE);
+  for (int i = 0; i < numCols; i++) {
+    dataFile.print(dataRow[i]);
+    dataFile.print(',');
   }
-
-  // Check for joystick click and update state.
-  if (digitalRead(CLICK) == LOW) {
-    isActive = !isActive;
-    while (digitalRead(CLICK) == LOW) {} // Hold code in this state until button is released
-  }
+  dataFile.println();
+  dataFile.flush();
+  dataFile.close();
+  digitalWrite(LED_B, LOW); // Turn off LED_B
 }
