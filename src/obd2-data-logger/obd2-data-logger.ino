@@ -96,9 +96,6 @@ void loop() {
         dataFile.println();
         dataFile.flush();
         dataFile.close();
-
-        digitalWrite(LED_A, HIGH);
-        digitalWrite(LED_B, LOW);
       //}
       }
     }
