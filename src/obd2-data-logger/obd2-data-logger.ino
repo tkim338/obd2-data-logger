@@ -81,21 +81,30 @@ void loop() {
       //if(message.id == 0x620 and message.data[2] == 0xFF) { //uncomment when you want to filter
         digitalWrite(LED_A, LOW);
         digitalWrite(LED_B, HIGH);
-      
-        File dataFile = SD.open(dataFilename, FILE_WRITE);
-        
-        dataFile.print(F("ID: "));
-        dataFile.print(message.id, HEX);
-        dataFile.print(F(", "));
-        dataFile.print(F("Data: "));
-        dataFile.print(message.header.length, DEC);
-        for(int i=0;i<message.header.length;i++) { 
-          dataFile.print(message.data[i], HEX);
-          dataFile.print(F(" "));
+
+        Serial.print("ID: ");
+        Serial.print(message.id,HEX);
+        Serial.print(", Data: ");
+        for(int i=0;i<message.header.length;i++) {
+          Serial.print(message.data[i],HEX);
+          Serial.print(" ");
         }
-        dataFile.println();
-        dataFile.flush();
-        dataFile.close();
+        Serial.println("");
+      
+//        File dataFile = SD.open(dataFilename, FILE_WRITE);
+//        
+//        dataFile.print(F("ID: "));
+//        dataFile.print(message.id, HEX);
+//        dataFile.print(F(", "));
+//        dataFile.print(F("Data: "));
+//        dataFile.print(message.header.length, DEC);
+//        for(int i=0;i<message.header.length;i++) { 
+//          dataFile.print(message.data[i], HEX);
+//          dataFile.print(F(" "));
+//        }
+//        dataFile.println();
+//        dataFile.flush();
+//        dataFile.close();
       //}
       }
     }
